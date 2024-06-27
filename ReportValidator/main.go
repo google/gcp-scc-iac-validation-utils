@@ -14,7 +14,8 @@
  limitations under the License.
 */
 
-// Package main converts IaC validation report in JSON to SARIF format.
+// Package main checks the scc iac-validation-report against the failure 
+// criteria and returns the validation state.
 package main
 
 import (

@@ -14,6 +14,7 @@
  limitations under the License.
 */
 
+// package converter constructs the IaC SCC scan report in to SARIF json format.
 package converter
 
 import (
@@ -30,7 +31,6 @@ const (
 	IAC_TOOL_NAME               = "analyze-code-security-scc"
 )
 
-// FromIACScanReport converts the SCC IAC validation report into SARIF format.
 func FromIACScanReport(report templates.IACValidationReport) (templates.SarifOutput, error) {
 	policyToViolationMap := getUniqueViolations(report.Violations)
 
@@ -79,8 +79,8 @@ func constructRules(policyToViolationMap map[string]templates.Violation) ([]temp
 	rules := []templates.Rule{}
 
 	for policyID, violation := range policyToViolationMap {
-		if !validateSeverity(violation.Severity) {
-			return nil, fmt.Errorf("validateSeverity() invalid severity: %s ", violation.Severity)
+		if !isSeverityValid(violation.Severity) {
+			return nil, fmt.Errorf("isSeverityValid() invalid severity: %s ", violation.Severity)
 		}
 
 		rule := templates.Rule{
@@ -137,10 +137,6 @@ func constructResults(violations []templates.Violation) []templates.Result {
 	return results
 }
 
-func validateSeverity(severity string) bool {
-	if severity != "CRITICAL" && severity != "HIGH" && severity != "MEDIUM" && severity != "LOW" {
-		return false
-	}
-
-	return true
+func isSeverityValid(severity string) bool {
+	return severity == "CRITICAL" || severity == "HIGH" || severity == "MEDIUM" || severity == "LOW" 
 }

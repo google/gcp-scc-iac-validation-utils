@@ -34,7 +34,7 @@ func TestEvaluateIACScanReport(t *testing.T) {
 		wantErr              bool
 	}{
 		{
-			name: "SeverityExceededThreshold_Succeeds",
+			name: "SingleSeverityExceededThreshold_WithOrOperator_Succeeds",
 			iacReport: templates.IACReportTemplate{
 				Response: templates.Responses{
 					IacValidationReport: templates.IACValidationReport{
@@ -53,7 +53,25 @@ func TestEvaluateIACScanReport(t *testing.T) {
 			wantErr:              false,
 		},
 		{
-			name: "SeverityBelowThreshold_Succeeds",
+			name: "SingleSeverityBelowThreshold_WithOrOperator_Succeeds",
+			iacReport: templates.IACReportTemplate{
+				Response: templates.Responses{
+					IacValidationReport: templates.IACValidationReport{
+						Violations: []templates.Violation{
+							{Severity: "CRITICAL"},
+						},
+					},
+				},
+			},
+			threshold: map[string]int{
+				"CRITICAL": 2,
+			},
+			operator:             "OR",
+			isBreachingThreshold: false,
+			wantErr:              false,
+		},
+		{
+			name: "SingleSeverityExceededThreshold_WithAndOperator_Succeeds",
 			iacReport: templates.IACReportTemplate{
 				Response: templates.Responses{
 					IacValidationReport: templates.IACValidationReport{
@@ -66,10 +84,70 @@ func TestEvaluateIACScanReport(t *testing.T) {
 			},
 			threshold: map[string]int{
 				"CRITICAL": 2,
-				"HIGH":     1,
+			},
+			operator:             "AND",
+			isBreachingThreshold: true,
+			wantErr:              false,
+		},
+		{
+			name: "SingleSeverityBelowThreshold_WithOrOperator_Succeeds",
+			iacReport: templates.IACReportTemplate{
+				Response: templates.Responses{
+					IacValidationReport: templates.IACValidationReport{
+						Violations: []templates.Violation{
+							{Severity: "CRITICAL"},
+						},
+					},
+				},
+			},
+			threshold: map[string]int{
+				"CRITICAL": 2,
 			},
 			operator:             "AND",
 			isBreachingThreshold: false,
+			wantErr:              false,
+		},
+		{
+			name: "MultipleSeverityExceededThreshold_Succeeds",
+			iacReport: templates.IACReportTemplate{
+				Response: templates.Responses{
+					IacValidationReport: templates.IACValidationReport{
+						Violations: []templates.Violation{
+							{Severity: "CRITICAL"},
+							{Severity: "CRITICAL"},
+							{Severity: "HIGH"},
+						},
+					},
+				},
+			},
+			threshold: map[string]int{
+				"CRITICAL": 2,
+				"HIGH":     1,
+			},
+			operator:             "OR",
+			isBreachingThreshold: true,
+			wantErr:              false,
+		},
+		{
+			name: "MultipleSeverityBelowThreshold_Succeeds",
+			iacReport: templates.IACReportTemplate{
+				Response: templates.Responses{
+					IacValidationReport: templates.IACValidationReport{
+						Violations: []templates.Violation{
+							{Severity: "CRITICAL"},
+							{Severity: "CRITICAL"},
+							{Severity: "HIGH"},
+							{Severity: "MEDIUM"},
+						},
+					},
+				},
+			},
+			threshold: map[string]int{
+				"CRITICAL": 2,
+				"HIGH":     1,
+			},
+			operator:             "AND",
+			isBreachingThreshold: true,
 			wantErr:              false,
 		},
 		{
@@ -258,7 +336,7 @@ func TestAll(t *testing.T) {
 			expectedOutput: true,
 		},
 		{
-			name:           "AllNotTrue",
+			name:           "SomeNotTrue",
 			input:          map[string]bool{"HIGH": true, "LOW": false, "MEDIUM": true},
 			expectedOutput: false,
 		},

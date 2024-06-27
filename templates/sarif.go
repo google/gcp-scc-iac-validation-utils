@@ -16,6 +16,9 @@
 
 package templates
 
+// SarifOutput is the struct for SARIF template. It only contains field
+// relavent for converting IaC scc scan report to SARIF report.
+// https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html
 type SarifOutput struct {
 	Version string `json:"version,omitempty"`
 	Schema  string `json:"$schema,omitempty"`
@@ -23,7 +26,6 @@ type SarifOutput struct {
 }
 
 type Run struct {
-	Note    string   `json:"note,omitempty"`
 	Tool    Tool     `json:"tool,omitempty"`
 	Results []Result `json:"results,omitempty"`
 }

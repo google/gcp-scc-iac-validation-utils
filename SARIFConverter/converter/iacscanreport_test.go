@@ -26,34 +26,34 @@ import (
 
 func TestGenerateReport(t *testing.T) {
 	tests := []struct {
-		Name                string
-		IACValidationReport templates.IACValidationReport
-		ExpectedError       bool
-		ExpectedOutput      templates.SarifOutput
+		name                string
+		validationReport templates.IACValidationReport
+		wantError       bool
+		wantOutput      templates.SarifOutput
 	}{
 		{
-			Name:                "ValidReport_Succeeds",
-			IACValidationReport: IACValidationValidReport,
-			ExpectedOutput:      IACValidSarifOutput,
-			ExpectedError:       false,
+			name:                "ValidReport_Succeeds",
+			validationReport: IACValidationValidReport,
+			wantOutput:      IACValidSarifOutput,
+			wantError:       false,
 		},
 		{
-			Name:                "InvalidSeverityReport_Failure",
-			IACValidationReport: IACValidationReportWithInvalidSeverity,
-			ExpectedOutput:      templates.SarifOutput{},
-			ExpectedError:       true,
+			name:                "InvalidSeverityReport_Failure",
+			validationReport: IACValidationReportWithInvalidSeverity,
+			wantOutput:      templates.SarifOutput{},
+			wantError:       true,
 		},
 	}
 
 	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			actualOutput, err := FromIACScanReport(test.IACValidationReport)
+		t.Run(test.name, func(t *testing.T) {
+			actualOutput, err := FromIACScanReport(test.validationReport)
 
-			if (err != nil) != test.ExpectedError {
-				t.Errorf("Expected error: %v, got: %v", test.ExpectedError, err)
+			if (err != nil) != test.wantError {
+				t.Errorf("Expected error: %v, got: %v", test.wantError, err)
 			}
 
-			if diff := cmp.Diff(test.ExpectedOutput, actualOutput); diff != "" {
+			if diff := cmp.Diff(test.wantOutput, actualOutput); diff != "" {
 				t.Errorf("Expected output (+got, -want): %v", diff)
 			}
 		})

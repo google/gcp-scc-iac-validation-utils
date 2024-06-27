@@ -43,7 +43,7 @@ func main() {
 
 	sarifReport, err := converter.FromIACScanReport(iacReport.Response.IacValidationReport)
 	if err != nil {
-		fmt.Printf("sarif.FromIACScanReport: %v", err)
+		fmt.Printf("converter.FromIACScanReport: %v", err)
 		os.Exit(1)
 	}
 

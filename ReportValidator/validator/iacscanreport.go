@@ -14,6 +14,8 @@
  limitations under the License.
 */
 
+// package validator evaluates the IaC report voilation against the
+// threshold limit.
 package validator
 
 import (
@@ -45,11 +47,7 @@ func computeViolationState(severityCounts map[string]int, thresholds map[string]
 			continue
 		}
 
-		if severityCounts[severity] < t {
-			failureCriteriaViolations[severity] = false
-		} else {
-			failureCriteriaViolations[severity] = true
-		}
+		failureCriteriaViolations[severity] = severityCounts[severity] >= t
 	}
 
 	return failureCriteriaViolations
@@ -97,7 +95,7 @@ func fetchViolationFromIACReport(iacReport templates.IACReportTemplate) (map[str
 
 	for _, v := range iacReport.Response.IacValidationReport.Violations {
 		s := strings.ToUpper(v.Severity)
-		if s != "CRITICAL" && s != "HIGH" && s != "MEDIUM" && s != "LOW" {
+		if !(s == "CRITICAL" || s == "HIGH" || s == "MEDIUM" || s == "LOW") {
 			return nil, fmt.Errorf("invalid severity expression: %s", s)
 		}
 

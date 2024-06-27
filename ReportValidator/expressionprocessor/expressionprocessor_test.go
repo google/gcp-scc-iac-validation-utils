@@ -31,8 +31,28 @@ func TestProcessExpression(t *testing.T) {
 		expectedError          bool
 	}{
 		{
-			name:       "Succeeds",
+			name:       "SingleSeverityInExpression_Succeeds",
+			expression: "critical:2,operator:and",
+			expectedSeverityCounts: map[string]int{
+				"CRITICAL": 2,
+			},
+			expectedOperator: "AND",
+			expectedError:    false,
+		},
+		{
+			name:       "MultipleSeverityInExpression_Succeeds",
 			expression: "critical:2,high:1,medium:3,operator:or",
+			expectedSeverityCounts: map[string]int{
+				"CRITICAL": 2,
+				"HIGH":     1,
+				"MEDIUM":   3,
+			},
+			expectedOperator: "OR",
+			expectedError:    false,
+		},
+		{
+			name:       "MixedCaseInExpression_Succeeds",
+			expression: "CrItICal:2,HiGH:1,medium:3,oPERATOR:oR",
 			expectedSeverityCounts: map[string]int{
 				"CRITICAL": 2,
 				"HIGH":     1,
@@ -58,6 +78,13 @@ func TestProcessExpression(t *testing.T) {
 		{
 			name:                   "OperatorNotPresent_Failure",
 			expression:             "critical:2,high:1,medium:3",
+			expectedSeverityCounts: nil,
+			expectedOperator:       "",
+			expectedError:          true,
+		},
+		{
+			name:                   "SeverityNotPresent_Failure",
+			expression:             "operator:or",
 			expectedSeverityCounts: nil,
 			expectedOperator:       "",
 			expectedError:          true,
@@ -176,7 +203,7 @@ func TestValidateSeverity(t *testing.T) {
 			wantError:     false,
 		},
 		{
-			name:          "UndefinedSeveirty_Error",
+			name:          "UndefinedSeverity_Error",
 			severity:      "Undefined",
 			severityCount: 1,
 			wantError:     true,

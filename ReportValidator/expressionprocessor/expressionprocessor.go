@@ -14,6 +14,8 @@
  limitations under the License.
 */
 
+// package expressionprocessor validates the input expression and extracts
+// operator and threshold values.
 package expressionprocessor
 
 import (
@@ -64,6 +66,10 @@ func ParseFailureExpression(expression string) (string, map[string]int, error) {
 		userViolationCount[key] = value
 	}
 
+	if len(userViolationCount) == 0 {
+		return "", nil, fmt.Errorf("no voilaition parameter found in expression")
+	}
+
 	if operator == "" {
 		return "", nil, fmt.Errorf("no operator found in expression")
 	}
@@ -76,11 +82,11 @@ func validateOperator(finalOperator, expressionOperator string) (string, error) 
 		return "", fmt.Errorf("more than one operator found in the expression %v", finalOperator)
 	}
 
-	if expressionOperator != "AND" && expressionOperator != "OR" {
-		return "", fmt.Errorf("invalid operator: %v", finalOperator)
+	if expressionOperator == "AND" || expressionOperator == "OR" {
+		return expressionOperator, nil
 	}
 
-	return expressionOperator, nil
+	return "", fmt.Errorf("invalid operator: %v", finalOperator)
 }
 
 func validateSeverity(severity string, severityCount int) error {
@@ -88,9 +94,9 @@ func validateSeverity(severity string, severityCount int) error {
 		return fmt.Errorf("validation expression can not have negative values")
 	}
 
-	if severity != "CRITICAL" && severity != "HIGH" && severity != "MEDIUM" && severity != "LOW" {
-		return fmt.Errorf("invalid severity expression: %s", severity)
+	if severity == "CRITICAL" || severity == "HIGH" || severity == "MEDIUM" || severity == "LOW" {
+		return nil
 	}
 
-	return nil
+	return fmt.Errorf("invalid severity expression: %s", severity)
 }
